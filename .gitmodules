@@ -1,3 +1,3 @@
 [submodule "sslib"]
 	path = sslib
-	url = https://github.com/lepelog/sslib.git
+	url = https://github.com/lepelog/sslib
