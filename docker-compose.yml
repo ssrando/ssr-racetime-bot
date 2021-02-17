@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  ss_rando_bot:
+    image: ss_rando_bot
+    build:
+      context: .
+    command: randobot ${GITHUB_TOKEN} ${CATEGORY_SLUG-lozssr} ${CLIENT_ID} ${CLIENT_SECRET} --verbose
+    restart: always
+    volumes:
+      - .:/ss-rando-bot
+      - egg_info:/ss-rando-bot/ss_rando_bot.egg-info
+
+volumes:
+  egg_info:
+    name: egg_info
