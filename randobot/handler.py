@@ -49,7 +49,7 @@ class RandoHandler(RaceHandler):
             await self.send_message("Translate 'Seed rolling is now locked' to French.")
 
     async def ex_rollseed(self, args, message):
-        if self.state.get("locked"):
+        if self.state.get("locked") and not can_monitor(message):
             await self.send_message("Seed rolling is locked! Only the creator of this room, a race monitor, or a moderator can roll a seed.")
             if self.state.get("use_french"):
                 await self.send_message("Translate 'Seed rolling is locked! Only the creator of this room, a race monitor, or a moderator can roll a seed.'")
@@ -59,6 +59,7 @@ class RandoHandler(RaceHandler):
             await self.send_message("The seed is already rolled! Use !permalink to view it.")
             if self.state.get("use_french"):
                 await self.send_message("Translate 'The seed is already rolled! Use !permalink to view it.' to French.")
+            return
 
         await self.send_message("Rolling seed.....")
         generated_seed = self.generator.generate_seed(self.state.get("permalink"), self.state.get("generate_spoiler_log"))
