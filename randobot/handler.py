@@ -63,11 +63,13 @@ class RandoHandler(RaceHandler):
         await self.send_message("Rolling seed.....")
         generated_seed = self.generator.generate_seed(self.state.get("permalink"), self.state.get("generate_spoiler_log"))
         permalink = generated_seed.get("permalink")
+        hash = generated_seed.get("hash")
+        seed = generated_seed.get("seed")
 
         self.logger.info(permalink)
 
         self.state["permalink"] = permalink
         self.state["permalink_available"] = True
 
-        await self.send_message(f"Permalink: {permalink}")
-        await self.set_raceinfo(f" - {permalink}", False, False)
+        await self.send_message(f"Seed: {seed}, Hash: {hash}, Permalink: {permalink}")
+        await self.set_raceinfo(f" - Seed: {seed}, Hash: {hash}, Permalink: {permalink}", False, False)

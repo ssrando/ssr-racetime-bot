@@ -3,7 +3,7 @@ from github import Github, InputFileContent
 import os
 import random
 import string
-import uuid
+import re
 
 
 class Generator:
@@ -11,14 +11,21 @@ class Generator:
         self.github_token = github_token
 
     def generate_seed(self, permalink, generate_spoiler_log):
-        seed_name = uuid.uuid4()
-        file_name = "".join(random.choice(string.digits) for _ in range(6))
+        seed_name = "".join(random.choice(string.digits) for _ in range(18))
+        file_name = "".join(random.choice(string.digits) for _ in range(18))
 
-        os.system(f"python sslib/ssrando.py -seed={seed_name} -permalink={permalink}")
+        os.system(f"python sslib/randoscript.py --dry-run --noui --seed={seed_name}") # --permalink={permalink} currently removed for tourney purposes
 
-        permalink_file_name = f"permalink_{seed_name}.txt"
+        if generate_spoiler_log:
+            permalink_file_name = f"SS Random {seed_name} - Spoiler Log.txt"
+        else:
+            permalink_file_name = f"SS Random {seed_name} - Anti Spoiler Log.txt"
+
         permalink_file = open(permalink_file_name, "r")
-        permalink = permalink_file.read()
+        log = permalink_file.read().split('\n')
+        permalink = log[1].split(' ')[1]
+        hash_re = re.compile('Hash : (.*)')
+        rando_hash = hash_re.findall(log[3])
         permalink_file.close()
 
         if generate_spoiler_log:
@@ -42,5 +49,7 @@ class Generator:
         return {
             "permalink": permalink,
             "file_name": file_name,
+            "seed": seed_name,
+            "hash": rando_hash,
             "spoiler_log_url": spoiler_log_url
         }
