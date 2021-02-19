@@ -7,6 +7,7 @@ class RandoHandler(RaceHandler):
     stop_at = ["cancelled", "finished"]
 
     STANDARD_RACE_PERMALINK = "JQEABAS+AA=="
+    STANDARD_SPOILER_RACE_PERMALINK = "rQAAAACWAw=="
 
     def __init__(self, generator, **kwargs):
         super().__init__(**kwargs)
@@ -23,14 +24,16 @@ class RandoHandler(RaceHandler):
         await self.send_message("Bot responses will now also be in French.")
         await self.send_message("Translate 'Bot responses will now also be in French.' to French.")
 
-    async def ex_permalink(self, args, message):
+    async def ex_seed(self, args, message):
         if not self.state.get("permalink_available"):
-            await self.send_message("There is no permalink! Please use !rollseed to get a permalink")
+            await self.send_message("There is no seed! Please use !rollseed to get one")
             if self.state.get("use_french"):
                 await self.send_message("Translate 'There is no permalink! Please use !rollseed to get a permalink' to French")
             return
         permalink = self.state.get("permalink")
-        await self.send_message(f"The permalink is: {permalink}")
+        hash = self.state.get("hash")
+        seed = self.state.get("seed")
+        await self.send_message(f"Seed: {seed}, Hash: {hash}, Permalink: {permalink}")
         if self.state.get("use_french"):
             await self.send_message(f"Translate 'The permalink is: {permalink}' to French.")
             
@@ -48,6 +51,14 @@ class RandoHandler(RaceHandler):
         if self.state.get("use_french"):
             await self.send_message("Translate 'Seed rolling is now locked' to French.")
 
+    @monitor_cmd
+    async def ex_reset(self, args, message):
+        self.state["permalink"] = None
+        self.state["seed"] = None
+        self.state["hash"] = None
+        self.state["permalink_available"] = False
+        await self.send_message("The Seed has been reset.")
+
     async def ex_rollseed(self, args, message):
         if self.state.get("locked") and not can_monitor(message):
             await self.send_message("Seed rolling is locked! Only the creator of this room, a race monitor, or a moderator can roll a seed.")
@@ -56,7 +67,7 @@ class RandoHandler(RaceHandler):
             return
             
         if self.state.get("permalink_available"):
-            await self.send_message("The seed is already rolled! Use !permalink to view it.")
+            await self.send_message("The seed is already rolled! Use !seed to view it.")
             if self.state.get("use_french"):
                 await self.send_message("Translate 'The seed is already rolled! Use !permalink to view it.' to French.")
             return
@@ -70,6 +81,8 @@ class RandoHandler(RaceHandler):
         self.logger.info(permalink)
 
         self.state["permalink"] = permalink
+        self.state["hash"] = hash
+        self.state["seed"] = seed
         self.state["permalink_available"] = True
 
         await self.send_message(f"Seed: {seed}, Hash: {hash}, Permalink: {permalink}")

@@ -25,7 +25,7 @@ class Generator:
         log = permalink_file.read().split('\n')
         permalink = log[1].split(' ')[1]
         hash_re = re.compile('Hash : (.*)')
-        rando_hash = hash_re.findall(log[3])
+        rando_hash = hash_re.findall(log[3])[0]
         permalink_file.close()
 
         if generate_spoiler_log:

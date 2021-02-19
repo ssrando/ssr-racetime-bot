@@ -5,3 +5,4 @@ __pycache__
 .venv
 *Log.txt
 .idea
+.env
