@@ -6,8 +6,8 @@ from racetime_bot import RaceHandler, monitor_cmd, can_monitor
 class RandoHandler(RaceHandler):
     stop_at = ["cancelled", "finished"]
 
-    STANDARD_RACE_PERMALINK = "QwEAAACAcDF8CQAAAAACAAAA"
-    STANDARD_SPOILER_RACE_PERMALINK = "QwEAAACAcDF8CQAAAAACAAAA"
+    STANDARD_RACE_PERMALINK = "IwUAAAAAwsXwJQAAAAAAgAAAAAA="
+    STANDARD_SPOILER_RACE_PERMALINK = "IwUAAAAAwsXwJQAAAAAAgAAAAAA="
 
     def __init__(self, generator, **kwargs):
         super().__init__(**kwargs)
@@ -68,13 +68,18 @@ class RandoHandler(RaceHandler):
 
     @monitor_cmd
     async def ex_reset(self, args, message):
-        self.state["permalink"] = None
+        self.state["permalink"] = self.STANDARD_RACE_PERMALINK
         self.state["seed"] = None
         self.state["hash"] = None
         self.state["permalink_available"] = False
         self.state["spoiler"] = False
         self.state["spoiler_url"] = None
         await self.send_message("The Seed has been reset.")
+
+    async def ex_permalink(self, args, message):
+        permalink = args[0]
+        self.state["permalink"] = permalink
+        await self.send_message(f"Updated permalink to {permalink}")
 
     async def ex_rollseed(self, args, message):
         if self.state.get("locked") and not can_monitor(message):
@@ -108,7 +113,7 @@ class RandoHandler(RaceHandler):
         await self.send_message(f"{version} Permalink: {permalink}, Hash: {hash}")
 
         if self.state.get("spoiler"):
-            url = generated_seed.get("url")
+            url = generated_seed.get("spoiler_log_url")
             self.state["spoiler_url"] = url
             await self.send_message(f"Spoiler Log URL available at {url}")
 
