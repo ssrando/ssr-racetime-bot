@@ -1,5 +1,7 @@
 # ss-rando-bot
 
+[![Discord](https://img.shields.io/discord/767090759773323264?label=Discord&logo=discord&style=plastic)](https://discord.ssrando.com)
+
 A [racetime.gg](https://racetime.gg) chat bot application for automatically 
 generating [SS Randomizer](https://github.com/lepelog/sslib) seeds in race rooms, based on wooferzfg's [TWW Rando Bot](https://github.com/wooferzfg/tww-rando-bot)
 
