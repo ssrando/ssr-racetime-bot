@@ -5,7 +5,7 @@ services:
     image: ss_rando_bot
     build:
       context: .
-    command: randobot ${GITHUB_TOKEN} ${CATEGORY_SLUG-lozssr} ${CLIENT_ID} ${CLIENT_SECRET} --verbose
+    command: randobot ${GITHUB_TOKEN} ${CATEGORY_SLUG} ${CLIENT_ID} ${CLIENT_SECRET} --verbose
     restart: always
     volumes:
       - .:/ss-rando-bot
