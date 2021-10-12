@@ -81,6 +81,10 @@ class RandoHandler(RaceHandler):
         self.state["permalink"] = permalink
         await self.send_message(f"Updated permalink to {permalink}")
 
+    async def ex_sgl(self, args, message):
+        self.state["permalink"] = 'IQ0IIDsD85rpUwAAAAAAACHIFwA='
+        await self.send_message(f"Updated the bot to SGL settings")
+
     async def ex_rollseed(self, args, message):
         if self.state.get("locked") and not can_monitor(message):
             await self.send_message("Seed rolling is locked! Only the creator of this room, a race monitor, "
