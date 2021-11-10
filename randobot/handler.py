@@ -1,6 +1,10 @@
 import asyncio
 from datetime import datetime, timedelta
 from racetime_bot import RaceHandler, monitor_cmd, can_monitor
+import random
+import hashlib
+import urllib.request
+import string
 
 
 class RandoHandler(RaceHandler):
@@ -19,6 +23,7 @@ class RandoHandler(RaceHandler):
     async def begin(self):
         self.state["permalink"] = self.STANDARD_RACE_PERMALINK
         self.state["spoiler"] = False
+        self.state["version"] = None
 
     async def ex_francais(self, args, message):
         self.state["use_french"] = True
@@ -74,6 +79,7 @@ class RandoHandler(RaceHandler):
         self.state["permalink_available"] = False
         self.state["spoiler"] = False
         self.state["spoiler_url"] = None
+        self.state["version"] = None
         await self.send_message("The Seed has been reset.")
 
     async def ex_permalink(self, args, message):
@@ -85,7 +91,13 @@ class RandoHandler(RaceHandler):
         self.state["permalink"] = 'IQ0IIDsD85rpUwAAAAAAACHIFwA='
         await self.send_message(f"Updated the bot to SGL settings")
 
+    async def ex_version(self, args, message):
+        version = args[0]
+        self.state["version"] = version
+        await self.send_message(f"Version set to {version}")
+
     async def ex_rollseed(self, args, message):
+        print("rolling seed")
         if self.state.get("locked") and not can_monitor(message):
             await self.send_message("Seed rolling is locked! Only the creator of this room, a race monitor, "
                                     "or a moderator can roll a seed.")
@@ -101,11 +113,30 @@ class RandoHandler(RaceHandler):
             return
 
         await self.send_message("Rolling seed.....")
-        generated_seed = self.generator.generate_seed(self.state.get("permalink"), self.state.get("spoiler"))
-        permalink = generated_seed.get("permalink")
-        hash = generated_seed.get("hash")
-        seed = generated_seed.get("seed")
-        version = generated_seed.get("version")
+        if self.state.get("version") == None:
+            generated_seed = self.generator.generate_seed(self.state.get("permalink"), self.state.get("spoiler"))
+            permalink = generated_seed.get("permalink")
+            hash = generated_seed.get("hash")
+            seed = generated_seed.get("seed")
+            version = generated_seed.get("version")
+        else:
+            version = self.state.get("version")
+            commit = version.split('_')[1]
+            seed_name = "".join(random.choice(string.digits) for _ in range(18))
+            file_name = "".join(random.choice(string.digits) for _ in range(18))
+            permalink = f"{self.state.get('permalink')}#{seed_name}"
+            current_hash = hashlib.md5()
+            current_hash.update(str(seed_name).encode("ASCII"))
+            current_hash.update(permalink.encode("ASCII"))
+            current_hash.update(version.encode("ASCII"))
+            with urllib.request.urlopen(f"http://raw.githubusercontent.com/ssrando/ssrando/{commit}/names.txt") as f:
+                data = f.read().decode("utf-8")
+                names = [s.strip() for s in data.split("\n")]
+            hash_random = random.Random()
+            hash_random.seed(current_hash.digest())
+            hash = " ".join(hash_random.choice(names) for _ in range(3))
+            seed = seed_name    
+            
 
         self.logger.info(permalink)
 
