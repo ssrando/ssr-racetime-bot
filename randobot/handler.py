@@ -21,6 +21,15 @@ class RandoHandler(RaceHandler):
         self.loop_ended = False
 
     async def begin(self):
+        if not self.state.get('intro_sent') and not self._race_in_progress():
+            await self.send_message(
+                "Welcome to Skyward Sword Randomizer! Setup you seed with !permalink <permalink> and !version <version> and roll with !rollseed"
+            )
+            await self.send_message(
+                "If no permalink is speciified, standard race settings will be used. "
+                "If no version is specified, the version bundled with the bot will be used. Ask a member of the racing council for details on which version this is"
+            )
+            self.state['intro_sent'] = True
         self.state["permalink"] = self.STANDARD_RACE_PERMALINK
         self.state["spoiler"] = False
         self.state["version"] = None
@@ -153,3 +162,6 @@ class RandoHandler(RaceHandler):
             await self.send_message(f"Spoiler Log URL available at {url}")
 
         await self.set_raceinfo(f" - {version} Seed: {seed}, Hash: {hash}, Permalink: {permalink}", False, False)
+
+    def _race_in_progress(self):
+        return self.data.get('status').get('value') in ('pending', 'in_progress')
