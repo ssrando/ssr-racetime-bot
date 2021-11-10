@@ -23,7 +23,7 @@ class RandoHandler(RaceHandler):
     async def begin(self):
         if not self.state.get('intro_sent') and not self._race_in_progress():
             await self.send_message(
-                "Welcome to Skyward Sword Randomizer! Setup you seed with !permalink <permalink> and !version <version> and roll with !rollseed"
+                "Welcome to Skyward Sword Randomizer! Setup your seed with !permalink <permalink> and !version <version> and roll with !rollseed"
             )
             await self.send_message(
                 "If no permalink is speciified, standard race settings will be used. "
@@ -51,6 +51,24 @@ class RandoHandler(RaceHandler):
             await self.send_message("Will create a public sharable Spoiler Log")
         else:
             await self.send_message("Will NOT create a public sharable Spoiler Log")
+
+    async def ex_info(self, args, message):
+        response = ""
+        if self.state.get("version") == None:
+            response += "No version specified. Using bundled version. "
+        else:
+            response += f"Version: {self.state.get('version')} "
+        response += f"Permalink: {self.state.get('permalink')} "
+        if self.state.get("spoiler"):
+            response += "Spoiler log will be generated and a link will be provided. "
+        else:
+            response += "Spoiler log will not be generated. "
+        if self.state.get("peramlink_available"):
+            response += "Seed has been rolled. Get it with !permalink. "
+        else:
+            response += "Seed not rolled. Roll with !rollseed. "
+        await self.send_message(response)
+
 
     async def ex_seed(self, args, message):
         if not self.state.get("permalink_available"):
