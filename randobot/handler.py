@@ -10,7 +10,7 @@ import string
 class RandoHandler(RaceHandler):
     stop_at = ["cancelled", "finished"]
 
-    STANDARD_RACE_PERMALINK = "IwUAAAAAwsXwJQAAAAAAgAAAAAA="
+    STANDARD_RACE_PERMALINK = "IQwAACADspoBUgAAAAAAABCK2CA="
     STANDARD_SPOILER_RACE_PERMALINK = "IwUAAAAAwsXwJQAAAAAAgAAAAAA="
 
     def __init__(self, generator, **kwargs):
@@ -149,7 +149,8 @@ class RandoHandler(RaceHandler):
         else:
             version = self.state.get("version")
             commit = version.split('_')[1]
-            seed_name = "".join(random.choice(string.digits) for _ in range(18))
+            seed_start = "".join(random.choice('123456789') for _ in range(1))
+            seed_name = seed_start.join(random.choice(string.digits) for _ in range(18))
             file_name = "".join(random.choice(string.digits) for _ in range(18))
             permalink = f"{self.state.get('permalink')}#{seed_name}"
             current_hash = hashlib.md5()

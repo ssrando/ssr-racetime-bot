@@ -4,6 +4,7 @@ import os
 import random
 import string
 import re
+import time
 
 
 class Generator:
@@ -11,11 +12,12 @@ class Generator:
         self.github_token = github_token
 
     def generate_seed(self, permalink, spoiler):
-        seed_name = "".join(random.choice(string.digits) for _ in range(18))
+        seed_start = "".join(random.choice('123456789') for _ in range(1))
+        seed_name = seed_start.join(random.choice(string.digits) for _ in range(17))
         file_name = "".join(random.choice(string.digits) for _ in range(18))
 
         os.system(f"python sslib/randoscript.py --dry-run --noui --seed={seed_name} --permalink={permalink}")
-
+        os.wait()
         try:
             spoiler_log_file_name = f"SS Random {seed_name} - Spoiler Log.txt"
             spoiler_log_file = open(spoiler_log_file_name, "r")
