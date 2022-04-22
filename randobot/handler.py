@@ -118,6 +118,11 @@ class RandoHandler(RaceHandler):
         self.state["permalink"] = 'IQ0IIDsD85rpUwAAAAAAACHIFwA='
         await self.send_message(f"Updated the bot to SGL settings")
 
+    async def ex_coop(self, args, message):
+        self.state["permalink"] = 'oQ0AIBAD85oJUgAAAAAAAAAQAw=='
+        self.state["version"] = '1.2.0_3868e57'
+        await self.send_message("Updated the bot Co-Op S1 settings")
+
     async def ex_version(self, args, message):
         version = args[0]
         self.state["version"] = version
