@@ -154,9 +154,8 @@ class RandoHandler(RaceHandler):
         else:
             version = self.state.get("version")
             commit = version.split('_')[1]
-            seed_start = "".join(random.choice('123456789') for _ in range(1))
-            seed_end = "".join(random.choice(string.digits) for _ in range(17))
-            seed_name = seed_start + seed_end
+            seed_name = random.choice('123456789')
+            seed_name += "".join(random.choice(string.digits) for _ in range(17))
             file_name = "".join(random.choice(string.digits) for _ in range(18))
             permalink = f"{self.state.get('permalink')}#{seed_name}"
             current_hash = hashlib.md5()

@@ -12,9 +12,8 @@ class Generator:
         self.github_token = github_token
 
     def generate_seed(self, permalink, spoiler):
-        seed_start = "".join(random.choice('123456789') for _ in range(1))
-        seed_end = "".join(random.choice(string.digits) for _ in range(17))
-        seed_name = seed_start + seed_end
+        seed_name = random.choice('123456789')
+        seed_name += "".join(random.choice(string.digits) for _ in range(17))
         file_name = "".join(random.choice(string.digits) for _ in range(18))
 
         os.system(f"python sslib/randoscript.py --dry-run --noui --seed={seed_name} --permalink={permalink}")
