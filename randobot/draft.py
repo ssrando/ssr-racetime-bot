@@ -4,14 +4,15 @@ class Draft:
 
     OPTIONS = {
         "3D Standard": "",
-        "3D EUD Off": "",
-        "2D EUD Off": "",
-        "2D Cubes": "",
-        "2D Keysanity": "",
-        "2D Swordless": "",
-        "2D Sky Keep": "",
-        "3D Open": "",
-        "3D Closed": "",
+        "3D EUD Off": "oQUAIDADo5oJUgAAAAAAAAAcBA==",
+        "2D EUD Off": "IQUAIDADo5oJUgAAAAAAAAAYBA==",
+        "2D Cubes": "IQ0AIBADo5oJUgAAAAAAAAAYBA==",
+        "2D Small Keysanity": "IQ0AIDADo5oJWgAAAAAAAAAYBA==",
+        "2D Full Keysanity": "IQ0AIDADo5oJmgAAAAAAAAAYBA==",
+        "2D Swordless": "gQ0AIDADo5oJUgAAAAAAAAAcBA==",
+        "2D Sky Keep": "IQ0AIDADopoJUgAAAAAAAAAYBA==",
+        "3D Open": "pw0AIDADo5oJUgAAAAAAAAAYBA==",
+        "3D Closed": "oA0AIDADo5oBUgAAAAAAAAAQBA==",
     }
 
     def __init__(self) -> None:
