@@ -64,6 +64,8 @@ This list is not comprehensive, for a full list check the handler.py file.
 - *!pick*: Registers a preset as picked
 
 ### Draft Presets 
+- *3D Standard*: ``oQ0AIDADo5oJUgAAAAAAAAAYBA==``
+
 - *3D EUD Off*: ``oQUAIDADo5oJUgAAAAAAAAAcBA==``
 
 - *2D EUD Off*: ``IQUAIDADo5oJUgAAAAAAAAAYBA==``

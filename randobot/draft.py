@@ -3,7 +3,7 @@ import random
 class Draft:
 
     OPTIONS = {
-        "3D Standard": "",
+        "3D Standard": "oQ0AIDADo5oJUgAAAAAAAAAYBA==",
         "3D EUD Off": "oQUAIDADo5oJUgAAAAAAAAAcBA==",
         "2D EUD Off": "IQUAIDADo5oJUgAAAAAAAAAYBA==",
         "2D Cubes": "IQ0AIBADo5oJUgAAAAAAAAAYBA==",
