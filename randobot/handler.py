@@ -166,6 +166,12 @@ class RandoHandler(RaceHandler):
             await self.send_message("Draft mode is not active")
         else:
             await self.send_message(f"Draft mode is active. Currently banned: {draft.banned}. Currently picked: {draft.picked}")
+            
+    async def ex_draftoptions(self, args, message):
+        if self.state["draft"] is None:
+            await self.send_message("Draft mode is not active")
+        else:
+            await self.send_message(f"Draft options: {', '.join(self.state['draft'].OPTIONS.keys())}")
 
     async def ex_rollseed(self, args, message):
         print("rolling seed")
