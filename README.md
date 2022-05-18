@@ -49,3 +49,35 @@ This list is not comprehensive, for a full list check the handler.py file.
 - *!reset*: Resets all current settings and the seed
 
 - *!francais*: Translates the bot's messages to French (currently no French translation available)
+
+### Draft Commands
+- *!draft*: Enables draft mode
+
+- *!draftoff*: Disables draft mode
+
+- *!draftstatus*: Shows the current status of the draft
+
+- *!draftoptions*: Displays the list of valid options recognized by the draft system
+
+- *!ban*: Registers a preset as banned
+
+- *!pick*: Registers a preset as picked
+
+### Draft Presets 
+- *3D EUD Off*: ``oQUAIDADo5oJUgAAAAAAAAAcBA==``
+
+- *2D EUD Off*: ``IQUAIDADo5oJUgAAAAAAAAAYBA==``
+
+- *2D Cubes*: ``IQ0AIBADo5oJUgAAAAAAAAAYBA==``
+
+- *2D Small Keysanity*: ``IQ0AIDADo5oJWgAAAAAAAAAYBA==``
+
+- *2D Full Keysanity*: ``IQ0AIDADo5oJmgAAAAAAAAAYBA==``
+
+- *2D Swordless*: ``gQ0AIDADo5oJUgAAAAAAAAAcBA==``
+
+- *2D Sky Keep*: ``IQ0AIDADopoJUgAAAAAAAAAYBA==``
+
+- *3D Open*: ``pw0AIDADo5oJUgAAAAAAAAAYBA==``
+
+- *3D Closed*: ``oA0AIDADo5oBUgAAAAAAAAAQBA==``

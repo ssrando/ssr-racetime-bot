@@ -28,7 +28,7 @@ class RandoHandler(RaceHandler):
                 "Welcome to Skyward Sword Randomizer! Setup your seed with !permalink <permalink> and !version <version> and roll with !rollseed"
             )
             await self.send_message(
-                "If no permalink is speciified, standard race settings will be used. "
+                "If no permalink is specified, standard race settings will be used. "
                 "If no version is specified, the version bundled with the bot will be used. Ask a member of the racing council for details on which version this is"
             )
             await self.send_message(
@@ -129,7 +129,7 @@ class RandoHandler(RaceHandler):
     async def ex_coop(self, args, message):
         self.state["permalink"] = 'oQ0AIBAD85oJUgAAAAAAAAAQAw=='
         self.state["version"] = '1.2.0_3868e57'
-        await self.send_message("Updated the bot Co-Op S1 settings")
+        await self.send_message("Updated the bot to Co-Op S1 settings")
 
     async def ex_version(self, args, message):
         version = args[0]
@@ -199,7 +199,7 @@ class RandoHandler(RaceHandler):
             (mode, perma) = self.state["draft"].make_selection()
             await self.send_message(f"Selected mode {mode}")
             self.state["permalink"] = perma
-        if self.state.get("version") == None:
+        if self.state.get("version") is None:
             generated_seed = self.generator.generate_seed(self.state.get("permalink"), self.state.get("spoiler"))
             permalink = generated_seed.get("permalink")
             hash = generated_seed.get("hash")
@@ -208,9 +208,9 @@ class RandoHandler(RaceHandler):
         else:
             version = self.state.get("version")
             commit = version.split('_')[1]
-            seed_name = random.choice('123456789')
-            seed_name += "".join(random.choice(string.digits) for _ in range(17))
-            file_name = "".join(random.choice(string.digits) for _ in range(18))
+            seed_start = random.choice('123456789')
+            seed_end = "".join(random.choice(string.digits) for _ in range(17))
+            seed_name = seed_start + seed_end
             permalink = f"{self.state.get('permalink')}#{seed_name}"
             current_hash = hashlib.md5()
             current_hash.update(str(seed_name).encode("ASCII"))
