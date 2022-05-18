@@ -31,6 +31,7 @@ class Draft:
             # invalid choice
             return f"Unable to ban option {option} - invalid option"
         self.banned.append(option)
+        return f"Banned {option}"
 
     
     def pick(self, option):
@@ -43,17 +44,16 @@ class Draft:
         if option not in self.all_options:
             # invalid choice
             return f"Unable to pick option {option} - invalid option"
-        self.banned.append(option)
-        return f"Banned {option}"
+        self.picked.append(option)
+        return f"Picked {option}"
 
 
     def make_selection(self):
-        if not self.picked and not self.banned:
-            return self.OPTIONS[random.choice(self.OPTIONS.keys())]
         possible_selections = self.picked
         possible_selections.append(random.choice([
             option for option in self.OPTIONS
             if option not in self.banned and option not in self.picked
         ]))
-        return self.OPTIONS[random.choice(possible_selections)]
+        choice = random.choice(possible_selections)
+        return (choice, self.OPTIONS[choice])
 

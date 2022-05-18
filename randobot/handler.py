@@ -132,24 +132,35 @@ class RandoHandler(RaceHandler):
         await self.send_message(f"Version set to {version}")
 
     async def ex_draft(self, args, message):
-        self.state["draft"] = Draft()
+        if self.state["draft"] is not None:
+            await self.send_message("Draft mode is already active")
+        else:
+            self.state["draft"] = Draft()
+            await self.send_message("Draft mode activated. The !ban and !pick commands are now active")
 
     async def ex_draftoff(self, args, message):
         self.state["draft"] = None
+        await self.send_message("Draft mode deactivated")
 
     async def ex_ban(self, args, message):
         if self.state["draft"] is None:
             await self.send_message("Draft mode is not active")
         else:
-            await self.send_message(self.state["draft"].ban(args[0]))
+            if len(args) == 0:
+                await self.send_message("No mode specified")
+            else: 
+                await self.send_message(self.state["draft"].ban(" ".join(args)))
     
     async def ex_pick(self, args, message):
         if self.state["draft"] is None:
             await self.send_message("Draft mode is not active")
         else:
-            await self.send_message(self.state["draft"].pick(args[0]))
+            if len(args) == 0:
+                await self.send_message("No mode specified")
+            else: 
+                await self.send_message(self.state["draft"].pick(" ".join(args)))
 
-    async def ex_draftstatue(self, args, message):
+    async def ex_draftstatus(self, args, message):
         draft = self.state["draft"]
         if draft is None:
             await self.send_message("Draft mode is not active")
@@ -173,6 +184,10 @@ class RandoHandler(RaceHandler):
             return
 
         await self.send_message("Rolling seed.....")
+        if self.state["draft"] is not None:
+            (mode, perma) = self.state["draft"].make_selection()
+            await self.send_message(f"Selected mode {mode}")
+            self.state["permalink"] = perma
         if self.state.get("version") == None:
             generated_seed = self.generator.generate_seed(self.state.get("permalink"), self.state.get("spoiler"))
             permalink = generated_seed.get("permalink")
