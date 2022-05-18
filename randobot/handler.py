@@ -6,6 +6,8 @@ import hashlib
 import urllib.request
 import string
 
+from randobot.draft import Draft
+
 
 class RandoHandler(RaceHandler):
     stop_at = ["cancelled", "finished"]
@@ -29,10 +31,15 @@ class RandoHandler(RaceHandler):
                 "If no permalink is speciified, standard race settings will be used. "
                 "If no version is specified, the version bundled with the bot will be used. Ask a member of the racing council for details on which version this is"
             )
+            await self.send_message(
+                "To enable draft mode, use !draft. Currently, draft mode must be self moderated, and is only designed for use in 1v1 races. If no picks or bans "
+                "are specified, a random option will be selected from the list of possible options"
+            )
             self.state['intro_sent'] = True
         self.state["permalink"] = self.STANDARD_RACE_PERMALINK
         self.state["spoiler"] = False
         self.state["version"] = None
+        self.state["draft"] = None
 
     async def ex_francais(self, args, message):
         self.state["use_french"] = True
@@ -107,6 +114,7 @@ class RandoHandler(RaceHandler):
         self.state["spoiler"] = False
         self.state["spoiler_url"] = None
         self.state["version"] = None
+        self.state["draft"] = None
         await self.send_message("The Seed has been reset.")
 
     async def ex_permalink(self, args, message):
@@ -122,6 +130,31 @@ class RandoHandler(RaceHandler):
         version = args[0]
         self.state["version"] = version
         await self.send_message(f"Version set to {version}")
+
+    async def ex_draft(self, args, message):
+        self.state["draft"] = Draft()
+
+    async def ex_draftoff(self, args, message):
+        self.state["draft"] = None
+
+    async def ex_ban(self, args, message):
+        if self.state["draft"] is None:
+            await self.send_message("Draft mode is not active")
+        else:
+            await self.send_message(self.state["draft"].ban(args[0]))
+    
+    async def ex_pick(self, args, message):
+        if self.state["draft"] is None:
+            await self.send_message("Draft mode is not active")
+        else:
+            await self.send_message(self.state["draft"].pick(args[0]))
+
+    async def ex_draftstatue(self, args, message):
+        draft = self.state["draft"]
+        if draft is None:
+            await self.send_message("Draft mode is not active")
+        else:
+            await self.send_message(f"Draft mode is active. Currently banned: {draft.banned}. Currently picked: {draft.picked}")
 
     async def ex_rollseed(self, args, message):
         print("rolling seed")

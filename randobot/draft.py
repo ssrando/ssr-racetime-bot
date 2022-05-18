@@ -48,6 +48,8 @@ class Draft:
 
 
     def make_selection(self):
+        if not self.picked and not self.banned:
+            return self.OPTIONS[random.choice(self.OPTIONS.keys())]
         possible_selections = self.picked
         possible_selections.append(random.choice([
             option for option in self.OPTIONS
