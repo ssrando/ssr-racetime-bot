@@ -1,7 +1,7 @@
 from datetime import datetime
 from github import Github, InputFileContent
 import os
-import random
+from random import SystemRandom
 import string
 import re
 import time
@@ -10,12 +10,13 @@ import time
 class Generator:
     def __init__(self, github_token):
         self.github_token = github_token
+        self.random = SystemRandom()
 
     def generate_seed(self, permalink, spoiler):
-        seed_start = random.choice('123456789')
-        seed_end = "".join(random.choice(string.digits) for _ in range(17))
+        seed_start = self.random.choice('123456789')
+        seed_end = "".join(self.random.choice(string.digits) for _ in range(17))
         seed_name = seed_start + seed_end
-        file_name = "".join(random.choice(string.digits) for _ in range(18))
+        file_name = "".join(self.random.choice(string.digits) for _ in range(18))
 
         os.system(f"python sslib/randoscript.py --dry-run --noui --seed={seed_name} --permalink={permalink}")
         os.wait()

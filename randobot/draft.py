@@ -1,4 +1,4 @@
-import random
+from random import SystemRandom
 
 class Draft:
 
@@ -19,6 +19,7 @@ class Draft:
         self.all_options = self.OPTIONS.keys()
         self.banned = []
         self.picked = []
+        self.random = SystemRandom()
 
 
     def ban(self, option):
@@ -51,10 +52,10 @@ class Draft:
 
     def make_selection(self):
         possible_selections = self.picked
-        possible_selections.append(random.choice([
+        possible_selections.append(self.random.choice([
             option for option in self.OPTIONS
             if option not in self.banned and option not in self.picked
         ]))
-        choice = random.choice(possible_selections)
+        choice = self.random.choice(possible_selections)
         return (choice, self.OPTIONS[choice])
 
