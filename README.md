@@ -76,7 +76,7 @@ This list is not comprehensive, for a full list check the handler.py file.
 
 - *2D Full Keysanity*: ``IQ0AIDADo5oJmgAAAAAAAAAYBA==``
 
-- *2D Swordless*: ``gQ0AIDADo5oJUgAAAAAAAAAcBA==``
+- *3D Sword Rewards Swordless*: ``gQ0AIDADo5oJUgAAAAAAAAAcBA==``
 
 - *2D Sky Keep*: ``IQ0AIDADopoJUgAAAAAAAAAYBA==``
 
