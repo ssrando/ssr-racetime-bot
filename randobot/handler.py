@@ -164,13 +164,22 @@ class RandoHandler(RaceHandler):
                 await self.send_message("No mode specified")
             else: 
                 await self.send_message(self.state["draft"].pick(" ".join(args)))
+    
+    async def ex_draftlog(self, args, message):
+        if self.state["draft"] is None:
+            await self.send_message("Draft mode is not active")
+        else:
+            if len(args) == 0:
+                await self.send_message("Please specify 'off' or 'on' to deactivate or activate the randomizer's spoiler log generation.")
+            else: 
+                await self.send_message(self.state["draft"].set_log_state("".join(args).strip()))
 
     async def ex_draftstatus(self, args, message):
         draft = self.state["draft"]
         if draft is None:
             await self.send_message("Draft mode is not active")
         else:
-            await self.send_message(f"Draft mode is active. Currently banned: {draft.banned}. Currently picked: {draft.picked}")
+            await self.send_message(f"Draft mode is active. Currently banned: {draft.banned}. Currently picked: {draft.picked}. Spoiler log: {draft.spoiler_log}.")
             
     async def ex_draftoptions(self, args, message):
         if self.state["draft"] is None:
@@ -238,8 +247,11 @@ class RandoHandler(RaceHandler):
             url = generated_seed.get("spoiler_log_url")
             self.state["spoiler_url"] = url
             await self.send_message(f"Spoiler Log URL available at {url}")
-
-        await self.set_raceinfo(f" - {version} Seed: {seed}, Hash: {hash}, Permalink: {permalink}", False, False)
+        
+        if self.state["draft"] is not None:
+            await self.set_raceinfo(f" - {version} Draft Option: {mode}, Seed: {seed}, Hash: {hash}, Permalink: {permalink}", False, False)
+        else:
+            await self.set_raceinfo(f" - {version} Seed: {seed}, Hash: {hash}, Permalink: {permalink}", False, False)
 
     def _race_in_progress(self):
         return self.data.get('status').get('value') in ('pending', 'in_progress')
