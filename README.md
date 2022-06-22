@@ -65,6 +65,10 @@ This list is not comprehensive, for a full list check the handler.py file.
 
 - *!draftlog*: Turns spoiler log generation in the permalink on if 'on' is the argument, or off if 'off' is the argument (defaults to on).
 
+- *!draftguide*: Given two one-word player names, enables draft guide mode, assuming the first player name is higher seed and the second is lower seed, and guides players through the draft process. This also resets the ban/pick list of the draft.
+
+- *!draftguideoff*: Disables draft guide mode.
+
 ### Draft Presets 
 - *3D Standard*: ``oQ0AIDADo5oJUgAAAAAAAAAYBA==``
 
