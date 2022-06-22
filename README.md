@@ -63,23 +63,21 @@ This list is not comprehensive, for a full list check the handler.py file.
 
 - *!pick*: Registers a preset as picked
 
+- *!draftlog*: Turns spoiler log generation in the permalink on if 'on' is the argument, or off if 'off' is the argument (defaults to on).
+
+- *!draftguide*: Given two one-word player names, enables draft guide mode, assuming the first player name is higher seed and the second is lower seed, and guides players through the draft process. This also resets the ban/pick list of the draft.
+
+- *!draftguideoff*: Disables draft guide mode.
+
 ### Draft Presets 
 - *3D Standard*: ``oQ0AIDADo5oJUgAAAAAAAAAYBA==``
 
 - *3D EUD Off*: ``oQUAIDADo5oJUgAAAAAAAAAcBA==``
 
-- *2D EUD Off*: ``IQUAIDADo5oJUgAAAAAAAAAYBA==``
-
 - *2D Cubes*: ``IQ0AIBADo5oJUgAAAAAAAAAYBA==``
 
-- *2D Small Keysanity*: ``IQ0AIDADo5oJWgAAAAAAAAAYBA==``
+- *3D Keysanity*: ``oQ0AIDADo5oJmgAAAAAAAAAYBA==``
 
-- *2D Full Keysanity*: ``IQ0AIDADo5oJmgAAAAAAAAAYBA==``
-
-- *3D Sword Rewards Swordless*: ``gQ0AIDADo5oJUgAAAAAAAAAcBA==``
-
-- *2D Sky Keep*: ``IQ0AIDADopoJUgAAAAAAAAAYBA==``
+- *3D Swordless*: ``gQ0AIDADo5oJUgAAAAAAAAAcBA==``
 
 - *3D Open*: ``pw0AIDADo5oJUgAAAAAAAAAYBA==``
-
-- *3D Closed*: ``oA0AIDADo5oBUgAAAAAAAAAQBA==``
