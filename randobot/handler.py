@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 from racetime_bot import RaceHandler, monitor_cmd, can_monitor
 import random
+from random import SystemRandom
 import hashlib
 import urllib.request
 import string
@@ -21,6 +22,7 @@ class RandoHandler(RaceHandler):
         self.generator = generator
         self.loop = asyncio.get_event_loop()
         self.loop_ended = False
+        self.random = SystemRandom()
 
     async def begin(self):
         if not self.state.get('intro_sent') and not self._race_in_progress():
@@ -208,8 +210,8 @@ class RandoHandler(RaceHandler):
         else:
             version = self.state.get("version")
             commit = version.split('_')[1]
-            seed_start = random.choice('123456789')
-            seed_end = "".join(random.choice(string.digits) for _ in range(17))
+            seed_start = self.random.choice('123456789')
+            seed_end = "".join(self.random.choice(string.digits) for _ in range(17))
             seed_name = seed_start + seed_end
             permalink = f"{self.state.get('permalink')}#{seed_name}"
             current_hash = hashlib.md5()
