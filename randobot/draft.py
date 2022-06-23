@@ -90,18 +90,7 @@ class Draft:
             if option not in self.banned and option not in self.picked
         ]))
         choice = self.random.choice(possible_selections)
-        return (choice, self.OPTIONS[choice])
 
-        possible_selections.append(
-            random.choice(
-                [
-                    option
-                    for option in self.OPTIONS
-                    if option not in self.banned and option not in self.picked
-                ]
-            )
-        )
-        choice = random.choice(possible_selections)
         perma = self.OPTIONS[choice]
         # the ninth character of every permalink in the draft options is 'o' when spoiler log if on, but '4' when spoiler log if off
         if not self.spoiler_log:
