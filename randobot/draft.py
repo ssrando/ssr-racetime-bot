@@ -4,12 +4,12 @@ from random import SystemRandom
 class Draft:
 
     OPTIONS = {
-        "3D Standard": "oQ0AIDADo5oJUgAAAAAAAAAYBA==",
-        "3D EUD Off": "oQUAIDADo5oJUgAAAAAAAAAcBA==",
-        "2D Cubes": "IQ0AIBADo5oJUgAAAAAAAAAYBA==",
-        "3D Keysanity": "oQ0AIDADo5oJmgAAAAAAAAAYBA==",
-        "3D Swordless": "gQ0AIDADo5oJUgAAAAAAAAAcBA==",
-        "3D Open": "pw0AIDADo5oJUgAAAAAAAAAYBA==",
+        "3D Standard": "oQ0AIDADo5oJUgAAAAAAAAAYFA==",
+        "3D EUD Off": "oQUAIDADo5oJUgAAAAAAAAAcGA==",
+        "2D Cubes": "IQ0AIBADo5oJUgAAAAAAAAAYEA==",
+        "3D Keysanity": "oQ0AIDADo5oJmgAAAAAAAAAYFA==",
+        "3D Swordless": "gQ0AIDADo5oJUgAAAAAAAAAcFA==",
+        "3D Open": "pw0AIDADo5oJUgAAAAAAAAAYFA==",
     }
 
     def __init__(self) -> None:
