@@ -9,7 +9,7 @@ class Draft:
         "2D Cubes": "IQ0AIBADo5oJUgAAAAAAAAAYEA==",
         "3D Keysanity": "oQ0AIDADo5oJmgAAAAAAAAAYFA==",
         "3D Swordless": "gQ0AIDADo5oJUgAAAAAAAAAcFA==",
-        "3D Open": "pw0AIDADo5oJUgAAAAAAAAAYFA==",
+        "3D Open": "pw0AADADo5oJUgAAAAAAAAAYFA==",
     }
 
     def __init__(self) -> None:
