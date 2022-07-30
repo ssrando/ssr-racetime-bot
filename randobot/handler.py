@@ -143,7 +143,7 @@ class RandoHandler(RaceHandler):
         self.state["version"] = "1.2.0_f268afa"
         self.state["draft"] = Draft()
         self.state["draft"].set_log_state("off")
-        await self.send_message("Updated the bot to Season 2 version. Draft mode has been enabled and reset, and the spoiler log has been disabled.")
+        await self.send_message("Updated the bot to Season 2 version. Draft mode has been enabled and reset, and the spoiler log has been disabled. You may now use the command !draftguide (high seed) (low seed) to guide you through the draft process with two players.")
 
     async def ex_version(self, args, message):
         version = args[0]
