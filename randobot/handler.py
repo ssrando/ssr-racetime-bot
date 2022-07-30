@@ -138,6 +138,12 @@ class RandoHandler(RaceHandler):
         self.state["permalink"] = "oQ0AIBAD85oJUgAAAAAAAAAQAw=="
         self.state["version"] = "1.2.0_3868e57"
         await self.send_message("Updated the bot to Co-Op S1 settings")
+    
+    async def ex_s2(self, args, message):
+        self.state["version"] = "1.2.0_f268afa"
+        self.state["draft"] = Draft()
+        self.state["draft"].set_log_state("off")
+        await self.send_message("Updated the bot to Season 2 version. Draft mode has been enabled and reset, and the spoiler log has been disabled.")
 
     async def ex_version(self, args, message):
         version = args[0]
