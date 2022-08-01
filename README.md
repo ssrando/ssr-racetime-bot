@@ -80,4 +80,4 @@ This list is not comprehensive, for a full list check the handler.py file.
 
 - *3D Swordless*: ``gQ0AIDADo5oJUgAAAAAAAAAcFA==``
 
-- *3D Open*: ``pw0AIDADo5oJUgAAAAAAAAAYFA==``
+- *3D Open*: ``pw0AADADo5oJUgAAAAAAAAAYFA==``
