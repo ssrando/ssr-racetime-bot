@@ -42,6 +42,7 @@ class RandoHandler(RaceHandler):
         self.state["spoiler"] = False
         self.state["version"] = None
         self.state["draft"] = None
+        await self.edit(hide_comments=True)
 
     async def ex_francais(self, args, message):
         self.state["use_french"] = True
