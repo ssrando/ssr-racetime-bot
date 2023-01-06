@@ -147,6 +147,8 @@ class RandoHandler(RaceHandler):
 
     async def ex_version(self, args, message):
         version = args[0]
+        if version[0] == 'v':
+            version = version[1:]
         self.state["version"] = version
         await self.send_message(f"Version set to {version}")
 
