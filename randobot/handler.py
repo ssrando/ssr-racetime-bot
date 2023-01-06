@@ -31,7 +31,7 @@ class RandoHandler(RaceHandler):
             )
             await self.send_message(
                 "If no permalink is specified, standard race settings will be used. "
-                "If no version is specified, the version bundled with the bot will be used. Ask a member of the racing council for details on which version this is"
+                "If no version is specified, the version bundled with the bot will be used. Ask a member of server staff for details on which version this is"
             )
             await self.send_message(
                 "To enable draft mode, use !draft. Currently, draft mode must be self moderated, and is only designed for use in 1v1 races. If no picks or bans "
