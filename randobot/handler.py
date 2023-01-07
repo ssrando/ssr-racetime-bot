@@ -42,13 +42,13 @@ class RandoHandler(RaceHandler):
         self.state["spoiler"] = False
         self.state["version"] = None
         self.state["draft"] = None
-        await self.edit(hide_comments=True)
+        #await self.edit(hide_comments=True)
 
     async def ex_francais(self, args, message):
         self.state["use_french"] = True
         await self.send_message("Bot responses will now also be in French.")
         await self.send_message(
-            "Translate 'Bot responses will now also be in French.' to French."
+            "Les réponses du bot seront désormais également en français."
         )
 
     async def ex_log(self, args, message):
