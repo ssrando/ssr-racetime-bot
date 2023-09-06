@@ -1,6 +1,3 @@
-[submodule "sslib"]
-	path = sslib
-	url = https://github.com/lepelog/sslib
-	branch = gui-redsign
-[submodule ".\\ssrando\\"]
+[submodule "ssrando"]
+	path = ssrando
 	url = git@github.com:ssrando/ssrando.git
