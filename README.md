@@ -20,12 +20,43 @@ generating [SS Randomizer](https://github.com/lepelog/sslib) seeds in race rooms
 
 1. Set up environment variables:
 ```
-export GITHUB_TOKEN=... # a GitHub personal access token with permission to create Gists
 export CATEGORY_SLUG=... # the slug of the racetime.gg category the bot should operate in (e.g. `twwr`)
 export CLIENT_ID=... # the OAuth2 client ID for this bot on racetime.gg
 export CLIENT_SECRET=... # the OAuth2 client secret for this bot on racetime.gg
 ```
 2. Run `docker-compose up` to start the bot.
+
+## Alternative without docker
+
+Create a virtual environment
+
+```
+virtualenv .venv
+```
+
+Make sure to always have that virtualenv activated when using the randbot
+
+```
+source .venv/bin/activate
+```
+
+Install the bot and its dependencies
+
+```
+python3 -mpip install -e .
+```
+
+Start the bot, make sure the environment variables are set!
+
+```
+randobot $CATEGORY_SLUG $CLIENT_ID $CLIENT_SECRET
+```
+
+You can also run the bot against a local racetime.gg setup
+
+```
+randobot $CATEGORY_SLUG $CLIENT_ID $CLIENT_SECRET --host localhost:8000 --insecure
+```
 
 
 ### Commands
@@ -49,3 +80,35 @@ This list is not comprehensive, for a full list check the handler.py file.
 - *!reset*: Resets all current settings and the seed
 
 - *!francais*: Translates the bot's messages to French (currently no French translation available)
+
+### Draft Commands
+- *!draft*: Enables draft mode
+
+- *!draftoff*: Disables draft mode
+
+- *!draftstatus*: Shows the current status of the draft
+
+- *!draftoptions*: Displays the list of valid options recognized by the draft system
+
+- *!ban*: Registers a preset as banned
+
+- *!pick*: Registers a preset as picked
+
+- *!draftlog*: Turns spoiler log generation in the permalink on if 'on' is the argument, or off if 'off' is the argument (defaults to on).
+
+- *!draftguide*: Given two one-word player names, enables draft guide mode, assuming the first player name is higher seed and the second is lower seed, and guides players through the draft process. This also resets the ban/pick list of the draft.
+
+- *!draftguideoff*: Disables draft guide mode.
+
+### Draft Presets 
+- *3D Standard*: ``oQ0AIDADo5oJUgAAAAAAAAAYFA==``
+
+- *3D EUD Off*: ``oQUAIDADo5oJUgAAAAAAAAAcGA==``
+
+- *2D Cubes*: ``IQ0AIBADo5oJUgAAAAAAAAAYEA==``
+
+- *3D Keysanity*: ``oQ0AIDADo5oJmgAAAAAAAAAYFA==``
+
+- *3D Swordless*: ``gQ0AIDADo5oJUgAAAAAAAAAcFA==``
+
+- *3D Open*: ``pw0AADADo5oJUgAAAAAAAAAYFA==``

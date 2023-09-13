@@ -1,4 +1,0 @@
-[submodule "sslib"]
-	path = sslib
-	url = https://github.com/lepelog/sslib
-	branch = gui-redsign
