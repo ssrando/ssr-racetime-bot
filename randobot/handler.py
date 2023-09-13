@@ -324,7 +324,7 @@ class RandoHandler(RaceHandler):
             (mode, perma) = self.state["draft"].make_selection()
             await self.send_message(f"Selected mode {mode}")
             self.state["permalink"] = perma
-        version = self.state.get("version") or "v2.0.0_b9f6c8d1"
+        version = self.state.get("version") or "v2.0.0_b9f6c8d"
         commit = version.split('_')[1]
         seed_start = self.random.choice('123456789')
         seed_end = "".join(self.random.choice(string.digits) for _ in range(17))
