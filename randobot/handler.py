@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
-from racetime_bot import RaceHandler, monitor_cmd, can_monitor
+from racetime_bot import RaceHandler, monitor_cmd, can_monitor, msg_actions
 import random
 from random import SystemRandom
 import hashlib
@@ -16,32 +16,90 @@ class RandoHandler(RaceHandler):
     STANDARD_RACE_PERMALINK = "IQwAACADspoBUgAAAAAAABCK2CA="
     STANDARD_SPOILER_RACE_PERMALINK = "IwUAAAAAwsXwJQAAAAAAgAAAAAA="
 
+    versions = {
+        "2.0.0_4b67ad1": "Latest (2.0.0_4b67ad1)"
+    }
+
+    permalinks = {
+        "Weekly": "o13NyEgCAAAAAAAAwDCgAVEgn+A9/P+b+f/HfgAAwP//AAAAwAMAAAAEAAAAAAAAAAAAAPgBAAAAAMAGKBABAAACsAAc/gBAAAk0Dg=="
+    }
+
+    greetings = (
+        'I can roll a seed for you, if motivated.',
+        'You will get a nice seed. Promised!',
+        'It is only a legend that I roll bad seeds. I think.',
+        'What is a good seed for you? I need to know. For reasons.',
+        'Ghirahim asked me to give you this seed. Is that fine?'
+    )
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.loop = asyncio.get_event_loop()
         self.loop_ended = False
         self.random = SystemRandom()
+        
 
     async def begin(self):
+        self.state["version"] = "2.0.0_4b67ad1"
+        self.state["permalink"] = "o13NyEgCAAAAAAAAwDCgAVEgn+A9/P+b+f/HfgAAwP//AAAAwAMAAAAEAAAAAAAAAAAAAPgBAAAAAMAGKBABAAACsAAc/gBAAAk0Dg=="
+        self.state["spoiler"] = False
+        self.state["draft"] = None
         if not self.state.get("intro_sent") and not self._race_in_progress():
             await self.send_message(
-                "Welcome to Skyward Sword Randomizer! Setup your seed with !permalink <permalink> and !version <version> and roll with !rollseed"
-            )
-            await self.send_message(
-                "If no permalink is specified, standard race settings will be used. "
-                "If no version is specified, the version bundled with the bot will be used. Ask a member of server staff for details on which version this is"
-            )
-            await self.send_message(
-                "To enable draft mode, use !draft. Currently, draft mode must be self moderated, and is only designed for use in 1v1 races. If no picks or bans "
-                "are specified, a random option will be selected from the list of possible options"
+                'Welcome to Skyward Sword Randomizer! Setup your seed with !permalink <permalink> and !version <version> and roll with !rollseed. ' + random.choice(self.greetings),
+                actions=[
+                    msg_actions.Action(
+                        label='Roll seed',
+                        help_text='Create a seed with a specific version and permalink',
+                        message='!rollseed ${version} ${permalink}',
+                        submit='Roll seed',
+                        survey=msg_actions.Survey(
+                            msg_actions.SelectInput(
+                                name='version',
+                                label='Version',
+                                options=self.versions,
+                                default="2.0.0_4b67ad1"
+                            ),
+                            msg_actions.TextInput(
+                                name='permalink',
+                                label='Permalink',
+                                placeholder='Paste your permalink here',
+                                help_text='The permalink of the settings you want to use.'
+                            )
+                        )
+                    ),
+                    msg_actions.Action(
+                        label='Roll weekly seed',
+                        help_text='Roll the weekly settings seed',
+                        message='!rollseed 2.0.0_4b67ad1 o13NyEgCAAAAAAAAwDCgAVEgn+A9/P+b+f/HfgAAwP//AAAAwAMAAAAEAAAAAAAAAAAAAPgBAAAAAMAGKBABAAACsAAc/gBAAAk0Dg=='
+                    ),
+                    msg_actions.Action(
+                        label='Version & Permalink',
+                        help_text='List the current version and permalink',
+                        message="Version : " + self.state.get("version") + " ; Permalink : " + self.state.get("permalink")
+                    )
+                ],
+                pinned=True
             )
             self.state["intro_sent"] = True
-        self.state["permalink"] = self.STANDARD_RACE_PERMALINK
-        self.state["spoiler"] = False
-        self.state["version"] = None
-        self.state["draft"] = None
+
         #await self.edit(hide_comments=True)
+
+    async def end(self):
+        if self.state.get('pinned_msg'):
+            await self.unpin_message(self.state['pinned_msg'])
+
+    async def chat_message(self, data):
+        message = data.get('message', {})
+        if (
+            message.get('is_bot')
+            and message.get('bot') == 'SSRandoBot'
+            and message.get('is_pinned')
+            and message.get('message_plain', '').startswith('Welcome to Skyward Sword Randomizer!')
+        ):
+            self.state['pinned_msg'] = message.get('id')
+        return await super().chat_message(data)
 
     async def ex_francais(self, args, message):
         self.state["use_french"] = True
@@ -324,11 +382,16 @@ class RandoHandler(RaceHandler):
             (mode, perma) = self.state["draft"].make_selection()
             await self.send_message(f"Selected mode {mode}")
             self.state["permalink"] = perma
-        version = self.state.get("version") or "v2.0.0_b9f6c8d"
+        
+        if len(args) > 1:
+            self.state["version"] = message["message_plain"].split(" ")[1]
+        version = self.state.get("version") or "2.0.0_4b67ad1"
         commit = version.split('_')[1]
         seed_start = self.random.choice('123456789')
         seed_end = "".join(self.random.choice(string.digits) for _ in range(17))
         seed_name = seed_start + seed_end
+        if len(args) > 1:
+            self.state["permalink"] = message["message_plain"].split(" ")[2]
         permalink = f"{self.state.get('permalink')}#{seed_name}"
         current_hash = hashlib.md5()
         current_hash.update(str(seed_name).encode("ASCII"))
@@ -345,6 +408,10 @@ class RandoHandler(RaceHandler):
         seed = seed_name
 
         self.logger.info(permalink)
+
+        if self.state.get('pinned_msg'):
+            await self.unpin_message(self.state['pinned_msg'])
+            del self.state['pinned_msg']
 
         self.state["permalink"] = permalink
         self.state["hash"] = hash
