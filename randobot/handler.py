@@ -17,11 +17,11 @@ class RandoHandler(RaceHandler):
     STANDARD_SPOILER_RACE_PERMALINK = "IwUAAAAAwsXwJQAAAAAAgAAAAAA="
 
     versions = {
-        "2.0.0_4b67ad1": "Latest (2.0.0_4b67ad1)"
+        "2.1.1_f389925": "Latest (2.1.1_f389925)"
     }
 
     permalinks = {
-        "Weekly": "o13NyEgCAAAAAAAAwDCgAVEgn+A9/P+b+f/HfgAAwP//AAAAwAMAAAAEAAAAAAAAAAAAAPgBAAAAAMAGKBABAAACsAAc/gBAAAk0Dg=="
+        "Weekly": "o13NyEgCAAAAAAAAIBjQgCiQT/Ae/v/N/P9jPwAA4P9/AAAA4AEAAAACAAAAAAAAAAAAAPgBAAAA/N8GKBABAAACsAAc/gBAAAg0Fg=="
     }
 
     greetings = (
@@ -41,8 +41,8 @@ class RandoHandler(RaceHandler):
         
 
     async def begin(self):
-        self.state["version"] = "2.0.0_4b67ad1"
-        self.state["permalink"] = "o13NyEgCAAAAAAAAwDCgAVEgn+A9/P+b+f/HfgAAwP//AAAAwAMAAAAEAAAAAAAAAAAAAPgBAAAAAMAGKBABAAACsAAc/gBAAAk0Dg=="
+        self.state["version"] = "2.1.1_f389925"
+        self.state["permalink"] = "o13NyEgCAAAAAAAAIBjQgCiQT/Ae/v/N/P9jPwAA4P9/AAAA4AEAAAACAAAAAAAAAAAAAPgBAAAA/N8GKBABAAACsAAc/gBAAAg0Fg=="
         self.state["spoiler"] = False
         self.state["draft"] = None
         if not self.state.get("intro_sent") and not self._race_in_progress():
@@ -59,7 +59,7 @@ class RandoHandler(RaceHandler):
                                 name='version',
                                 label='Version',
                                 options=self.versions,
-                                default="2.0.0_4b67ad1"
+                                default="2.1.1_f389925"
                             ),
                             msg_actions.TextInput(
                                 name='permalink',
@@ -72,7 +72,7 @@ class RandoHandler(RaceHandler):
                     msg_actions.Action(
                         label='Roll weekly seed',
                         help_text='Roll the weekly settings seed',
-                        message='!rollseed 2.0.0_4b67ad1 o13NyEgCAAAAAAAAwDCgAVEgn+A9/P+b+f/HfgAAwP//AAAAwAMAAAAEAAAAAAAAAAAAAPgBAAAAAMAGKBABAAACsAAc/gBAAAk0Dg=='
+                        message='!rollseed 2.1.1_f389925 o13NyEgCAAAAAAAAIBjQgCiQT/Ae/v/N/P9jPwAA4P9/AAAA4AEAAAACAAAAAAAAAAAAAPgBAAAA/N8GKBABAAACsAAc/gBAAAg0Fg=='
                     ),
                     msg_actions.Action(
                         label='Version & Permalink',
@@ -94,7 +94,7 @@ class RandoHandler(RaceHandler):
         message = data.get('message', {})
         if (
             message.get('is_bot')
-            and message.get('bot') == 'SSRandoBot'
+            and message.get('bot') == 'SS Rando Bot'
             and message.get('is_pinned')
             and message.get('message_plain', '').startswith('Welcome to Skyward Sword Randomizer!')
         ):
@@ -190,7 +190,7 @@ class RandoHandler(RaceHandler):
             await self.send_message("La Seed a été réinitialisée")
 
     async def ex_permalink(self, args, message):
-        permalink = args[0]
+        permalink = message["message_plain"].split(" ")[1]
         self.state["permalink"] = permalink
         await self.send_message(f"Updated permalink to {permalink}")
         if self.state.get("use_french"):
@@ -220,7 +220,7 @@ class RandoHandler(RaceHandler):
                 "Mis à jour le bot à la version Saison 2. 'Draft Mode' a été activé et réinitialisé, et le spoiler log a été désactivé. Vous pouvez maintenant utiliser la commande !draftguide (seed haute) (seed basse) pour vous guider durant le processus de sélection avec deux joueurs.")
 
     async def ex_version(self, args, message):
-        version = args[0]
+        version = message["message_plain"].split(" ")[1]
         if version[0] == 'v':
             version = version[1:]
         self.state["version"] = version
@@ -385,7 +385,7 @@ class RandoHandler(RaceHandler):
         
         if len(args) > 1:
             self.state["version"] = message["message_plain"].split(" ")[1]
-        version = self.state.get("version") or "2.0.0_4b67ad1"
+        version = self.state.get("version") or "2.1.1_f389925"
         commit = version.split('_')[1]
         seed_start = self.random.choice('123456789')
         seed_end = "".join(self.random.choice(string.digits) for _ in range(17))
@@ -418,7 +418,7 @@ class RandoHandler(RaceHandler):
         self.state["seed"] = seed
         self.state["permalink_available"] = True
 
-        await self.send_message(f"{version} Permalink: {permalink}, Hash: {hash}")
+        await self.send_message(f"{version} Permalink: {permalink}, Hash: {hash}", pinned=True)
 
         if self.state.get("spoiler"):
             url = generated_seed.get("spoiler_log_url")
