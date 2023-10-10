@@ -1,5 +1,6 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+import isodate
 from racetime_bot import RaceHandler, monitor_cmd, can_monitor, msg_actions
 import random
 from random import SystemRandom
@@ -39,12 +40,26 @@ class RandoHandler(RaceHandler):
         self.loop_ended = False
         self.random = SystemRandom()
         
-
+    # Called when opening the raceroom - setups a lot of things
     async def begin(self):
+        # Set seed rolling variables
         self.state["version"] = "2.1.1_f389925"
         self.state["permalink"] = "o13NyEgCAAAAAAAAIBjQgCiQT/Ae/v/N/P9jPwAA4P9/AAAA4AEAAAACAAAAAAAAAAAAAPgBAAAA/N8GKBABAAACsAAc/gBAAAg0Fg=="
         self.state["spoiler"] = False
         self.state["draft"] = None
+
+        # Breaks variables
+        self.state["break_set"] = False
+        self.state["break_duration"] = 5
+        self.state["break_interval"] = 120
+        self.state["break_warning_sent"] = False
+        self.state["break_in_progress"] = False
+        self.state["last_break_time"] = None
+        self.state["15_warning_sent"] = False
+        self.state["5_warning_sent"] = False
+        self.state["1_warning_sent"] = False
+
+        # First message with buttons to help roll a seed
         if not self.state.get("intro_sent") and not self._race_in_progress():
             await self.send_message(
                 'Welcome to Skyward Sword Randomizer! Setup your seed with !permalink <permalink> and !version <version> and roll with !rollseed. ' + random.choice(self.greetings),
@@ -86,10 +101,46 @@ class RandoHandler(RaceHandler):
 
         #await self.edit(hide_comments=True)
 
+    # Unpin the first message of the room if it has not been unpinned yet on room closing
     async def end(self):
         if self.state.get('pinned_msg'):
             await self.unpin_message(self.state['pinned_msg'])
 
+    # Handles all tasks that use the racetime room timer
+    async def handle_scheduled_tasks(self):
+        while not self.loop_ended:
+            try:
+                if self.data.get("started_at") is not None and self.state.get("breaks_set"):
+                    break_duration = self.state.get("break_duration")
+                    break_interval = self.state.get("break_interval")
+
+                    if self.state.get("last_break_time") is None:
+                        self.state["last_break_time"] = isodate.parse_datetime(self.data.get("started_at"))
+                    seconds_until_next_break = self._get_seconds_until_next_break()
+
+                    if not self.state.get("break_warning_sent") and seconds_until_next_break < 300:
+                        await self.send_message("@entrants Reminder: Next break in 5 minutes.")
+                        self.state["break_warning_sent"] = True
+
+                    if not self.state.get("break_in_progress") and seconds_until_next_break < 0:
+                        await self.send_message(
+                            f"@entrants Break time! Please pause your game for {break_duration} minutes."
+                        )
+                        self.state["break_in_progress"] = True
+
+                    if self.state.get("break_in_progress") and seconds_until_next_break < break_duration * -60:
+                        await self.send_message("@entrants Break ended. You may resume playing.")
+                        self.state["break_warning_sent"] = False
+                        self.state["break_in_progress"] = False
+                        self.state["last_break_time"] = self.state.get("last_break_time") + timedelta(
+                            0, 0, 0, 0, break_interval
+                        )
+            except Exception:
+                pass
+            finally:
+                await asyncio.sleep(0.5)
+
+    # Get the id of the first bot message to be able to unpin it later
     async def chat_message(self, data):
         message = data.get('message', {})
         if (
@@ -99,8 +150,84 @@ class RandoHandler(RaceHandler):
             and message.get('message_plain', '').startswith('Welcome to Skyward Sword Randomizer!')
         ):
             self.state['pinned_msg'] = message.get('id')
+        elif (
+            message.get('is_bot')
+            and message.get('bot') == 'SS Rando Bot'
+            and message.get('is_pinned')
+            and message.get('message_plain', '').startswith(self.state["seed_message"])
+        ):
+            self.state['pinned_msg_seed'] = message.get('id')
         return await super().chat_message(data)
+    
+    # !breaks
+    # Set breaks or disable them
+    async def ex_breaks(self, args, message):
+        if self._race_in_progress():
+            if self.state.get("breaks_set"):
+                seconds_until_next_break = self._get_seconds_until_next_break()
+                if not self.state.get("break_in_progress"):
+                    await self.send_message(
+                        f"The next break is in {self._get_formatted_duration_str(seconds_until_next_break)}."
+                    )
+                else:
+                    # During a break, `seconds_until_next_break` = - seconds_since_break_started
+                    seconds_until_break_ends = (self.state.get("break_duration") * 60) + seconds_until_next_break
+                    await self.send_message(
+                        f"The break ends in {self._get_formatted_duration_str(seconds_until_break_ends)}."
+                    )
+            else:
+                await self.send_message("Breaks have not been set.")
+        elif len(args) == 0:
+            if self.state.get("breaks_set"):
+                break_duration = self.state.get("break_duration")
+                break_interval = self.state.get("break_interval")
+                await self.send_message(f"Breaks are set for {break_duration} minutes every {break_interval} minutes.")
+            else:
+                await self.send_message(
+                    'Breaks are off. Example usage is "!breaks 5 120" for 5-minute breaks every 120 minutes.'
+                )
+        elif len(args) == 1:
+            if args[0] == "off":
+                if self.state.get("breaks_set"):
+                    self.state["breaks_set"] = False
+                    self.state["break_duration"] = 5
+                    self.state["break_interval"] = 120
+                    await self.send_message("Breaks have been turned off.")
+                else:
+                    await self.send_message("Breaks are already off.")
+            else:
+                await self.send_message(
+                    'Error parsing command. Example usage is "!breaks 5 120" for 5-minute breaks every 120 minutes.'
+                )
+        else:
+            break_duration, break_interval = args
 
+            try:
+                break_duration = max(5, int(break_duration))
+            except (TypeError, ValueError):
+                await self.send_message(f"{break_duration} is not a valid time.")
+                return
+
+            try:
+                break_interval = max(60, int(break_interval))
+            except (TypeError, ValueError):
+                await self.send_message(f"{break_interval} is not a valid time.")
+                return
+
+            # Ensure that there's a valid amount of time in-between breaks
+            if break_interval <= break_duration + 5:
+                await self.send_message("Error. Please ensure there are more than 5 minutes in-between breaks.")
+                return
+
+            self.state["breaks_set"] = True
+            self.state["break_duration"] = break_duration
+            self.state["break_interval"] = break_interval
+            await self.send_message(
+                f"Breaks have been set for {break_duration} minutes every {break_interval} minutes."
+            )
+
+    # !francais
+    # Triggers french translation
     async def ex_francais(self, args, message):
         self.state["use_french"] = True
         await self.send_message("Bot responses will now also be in French.")
@@ -108,11 +235,15 @@ class RandoHandler(RaceHandler):
             "Les réponses du bot seront désormais également en français."
         )
 
+    # !log
+    # Sends the spoiler log of the seed in spoiler log races
     async def ex_log(self, args, message):
         if self.state.get("spoiler_url") and self.state.get("spoiler"):
             url = self.state.get("spoiler_url")
             await self.send_message(f"Spoiler Log can be found at {url}")
 
+    # !spoiler
+    # Enable or disable spoiler log race
     async def ex_spoiler(self, args, message):
         spoiler = not self.state.get("spoiler")
         self.state["spoiler"] = spoiler
@@ -125,6 +256,9 @@ class RandoHandler(RaceHandler):
             if self.state.get("use_french"):
                 await self.send_message("Un Spoiler Log public et partageable ne sera PAS crée")
 
+    # !info
+    # Prints the version and permalink currently set
+    # /!\ Might be outdated
     async def ex_info(self, args, message):
         response = ""
         if self.state.get("version") == None:
@@ -142,6 +276,8 @@ class RandoHandler(RaceHandler):
             response += "Seed not rolled. Roll with !rollseed. "
         await self.send_message(response)
 
+    # !seed
+    # Prints info from a seed already rolled
     async def ex_seed(self, args, message):
         if not self.state.get("permalink_available"):
             await self.send_message("There is no seed! Please use !rollseed to get one")
@@ -159,6 +295,8 @@ class RandoHandler(RaceHandler):
                 f"Translate 'The permalink is: {permalink}' to French."
             )
 
+    # !lock
+    # Locks the raceroom seedrolling
     @monitor_cmd
     async def ex_lock(self, args, message):
         self.state["locked"] = True
@@ -168,6 +306,8 @@ class RandoHandler(RaceHandler):
                 "La génération de seed est désormais bloquée."
             )
 
+    # !unlock
+    # Unlocks the raceroom seedrolling
     @monitor_cmd
     async def ex_unlock(self, args, message):
         self.state["locked"] = False
@@ -175,6 +315,8 @@ class RandoHandler(RaceHandler):
         if self.state.get("use_french"):
             await self.send_message("La génération de seed est désormais débloquée.")
 
+    # !reset
+    # Delete any set variable in the raceroom such as the seed, version, permalink, etc...
     @monitor_cmd
     async def ex_reset(self, args, message):
         self.state["permalink"] = self.STANDARD_RACE_PERMALINK
@@ -185,10 +327,28 @@ class RandoHandler(RaceHandler):
         self.state["spoiler_url"] = None
         self.state["version"] = None
         self.state["draft"] = None
+        self.state["break_set"] = False
+        self.state["break_duration"] = 5
+        self.state["break_interval"] = 120
+        self.state["break_warning_sent"] = False
+        self.state["break_in_progress"] = False
+        self.state["last_break_time"] = None
+        self.state["15_warning_sent"] = False
+        self.state["5_warning_sent"] = False
+        self.state["1_warning_sent"] = False
+        self.state["seed_message"] = None
         await self.send_message("The Seed has been reset.")
         if self.state.get("use_french"):
             await self.send_message("La Seed a été réinitialisée")
 
+        if self.state.get('pinned_msg_seed'):
+            await self.unpin_message(self.state['pinned_msg_seed'])
+
+        if self.state.get('pinned_msg'):
+            await self.pin_message(self.state['pinned_msg'])
+
+    # !permalink
+    # Sets the permalink used to roll the seed
     async def ex_permalink(self, args, message):
         permalink = message["message_plain"].split(" ")[1]
         self.state["permalink"] = permalink
@@ -196,12 +356,18 @@ class RandoHandler(RaceHandler):
         if self.state.get("use_french"):
             await self.send_message(f"Permalien mis à jour: {permalink}")
 
+    # !sgl
+    # Sets permalink to SGL settings
+    # /!\ Outdated
     async def ex_sgl(self, args, message):
         self.state["permalink"] = "IQ0IIDsD85rpUwAAAAAAACHIFwA="
         await self.send_message(f"Updated the bot to SGL settings")
         if self.state.get("use_french"):
             await self.send_message("Mis à jour le bot pour les paramètres SGL")
 
+    # !coop
+    # Sets permalink and version to coop settings
+    # /!\ Outdated
     async def ex_coop(self, args, message):
         self.state["permalink"] = "oQ0AIBAD85oJUgAAAAAAAAAQAw=="
         self.state["version"] = "1.2.0_3868e57"
@@ -209,6 +375,9 @@ class RandoHandler(RaceHandler):
         if self.state.get("use_french"):
             await self.send_message("Mis à jour le bot pour les paramètres Co-Op S1")
 
+    # !s2
+    # Sets permalink and version to s2 settings
+    # /!\ Outdated
     async def ex_s2(self, args, message):
         self.state["version"] = "1.2.0_f268afa"
         self.state["draft"] = Draft()
@@ -219,6 +388,8 @@ class RandoHandler(RaceHandler):
             await self.send_message(
                 "Mis à jour le bot à la version Saison 2. 'Draft Mode' a été activé et réinitialisé, et le spoiler log a été désactivé. Vous pouvez maintenant utiliser la commande !draftguide (seed haute) (seed basse) pour vous guider durant le processus de sélection avec deux joueurs.")
 
+    # !version
+    # Sets version used to roll the seed
     async def ex_version(self, args, message):
         version = message["message_plain"].split(" ")[1]
         if version[0] == 'v':
@@ -228,6 +399,9 @@ class RandoHandler(RaceHandler):
         if self.state.get("use_french"):
             await self.send_message(f"Version définie à {version}")
 
+    # !draft
+    # Enable draft mode
+    # /!\ Needs update
     async def ex_draft(self, args, message):
         if self.state["draft"] is not None:
             await self.send_message("Draft mode is already active")
@@ -243,12 +417,16 @@ class RandoHandler(RaceHandler):
                     "'Draft Mode' activé. Les commandes !ban et !pick sont désormais utilisables"
                 )
 
+    # !draftoff
+    # Disable draft mode
     async def ex_draftoff(self, args, message):
         self.state["draft"] = None
         await self.send_message("Draft mode deactivated")
         if self.state.get("use_french"):
             await self.send_message("'Draft Mode' désactivé")
 
+    # !ban
+    # Ban a setting if in Draft mode
     async def ex_ban(self, args, message):
         if self.state["draft"] is None:
             await self.send_message("Draft mode is not active")
@@ -262,6 +440,8 @@ class RandoHandler(RaceHandler):
             else:
                 await self.send_message(self.state["draft"].ban(" ".join(args)))
 
+    # !pick
+    # Pick a setting if in Draft mode
     async def ex_pick(self, args, message):
         if self.state["draft"] is None:
             await self.send_message("Draft mode is not active")
@@ -275,6 +455,8 @@ class RandoHandler(RaceHandler):
             else:
                 await self.send_message(self.state["draft"].pick(" ".join(args)))
 
+    # !draftlog
+    # Enables or disables Spoiler log for Draft races
     async def ex_draftlog(self, args, message):
         if self.state["draft"] is None:
             await self.send_message("Draft mode is not active")
@@ -294,6 +476,8 @@ class RandoHandler(RaceHandler):
                     self.state["draft"].set_log_state("".join(args).strip())
                 )
 
+    # !draftguide
+    # Sets the 2 players that will be drafting : Higher seed, then Lower seed
     async def ex_draftguide(self, args, message):
         if self.state["draft"] is None:
             await self.send_message("Draft mode is not active")
@@ -315,6 +499,8 @@ class RandoHandler(RaceHandler):
                     self.state["draft"].seeding_init(args[0], args[1])
                 )
 
+    # !draftguideoff
+    # Deactivate Draft guide mode
     async def ex_draftguideoff(self, args, message):
         if self.state["draft"] is None:
             await self.send_message("Draft mode is not active")
@@ -325,6 +511,8 @@ class RandoHandler(RaceHandler):
         if self.state.get("use_french"):
             await self.send_message("Guide du 'Draft Mode' désactivé")
 
+    # !draftstatus
+    # Prints the banned and selected settings, as well as the next action needed
     async def ex_draftstatus(self, args, message):
         draft = self.state["draft"]
         if draft is None:
@@ -344,6 +532,8 @@ class RandoHandler(RaceHandler):
                     status_message += f" picks."
             await self.send_message(status_message)
 
+    # !draftoptions
+    # Prints the available options for Draft
     async def ex_draftoptions(self, args, message):
         if self.state["draft"] is None:
             await self.send_message("Draft mode is not active")
@@ -354,6 +544,8 @@ class RandoHandler(RaceHandler):
                 f"Draft options: {', '.join(self.state['draft'].OPTIONS.keys())}"
             )
 
+    # !rollseed
+    # Rolls a seed
     async def ex_rollseed(self, args, message):
         print("rolling seed")
         if self.state.get("locked") and not can_monitor(message):
@@ -411,21 +603,24 @@ class RandoHandler(RaceHandler):
 
         if self.state.get('pinned_msg'):
             await self.unpin_message(self.state['pinned_msg'])
-            del self.state['pinned_msg']
 
         self.state["permalink"] = permalink
         self.state["hash"] = hash
         self.state["seed"] = seed
         self.state["permalink_available"] = True
 
+        self.state["seed_message"] = f"{version} Permalink: {permalink}, Hash: {hash}"
+
         await self.send_message(f"{version} Permalink: {permalink}, Hash: {hash}", pinned=True)
 
-        if self.state.get("spoiler"):
-            url = generated_seed.get("spoiler_log_url")
-            self.state["spoiler_url"] = url
-            await self.send_message(f"Spoiler Log URL available at {url}")
-            if self.state.get("use_french"):
-                await self.send_message(f"Spoiler Log disponible à l'url: {url}")
+        # Need to think about how to handle Spoiler log races
+
+        # if self.state.get("spoiler"):
+        #     url = generated_seed.get("spoiler_log_url")
+        #     self.state["spoiler_url"] = url
+        #     await self.send_message(f"Spoiler Log URL available at {url}")
+        #     if self.state.get("use_french"):
+        #         await self.send_message(f"Spoiler Log disponible à l'url: {url}")
 
         if self.state["draft"] is not None:
             await self.set_raceinfo(
@@ -440,5 +635,14 @@ class RandoHandler(RaceHandler):
                 False,
             )
 
+    # Returns True is race is ongoing
     def _race_in_progress(self):
         return self.data.get("status").get("value") in ("pending", "in_progress")
+
+    # Returns time until next break in seconds
+    def _get_seconds_until_next_break(self):
+        if self.state.get("last_break_time") is None:
+            return 0
+
+        seconds_since_last_break = (datetime.now(timezone.utc) - self.state.get("last_break_time")).total_seconds()
+        return (self.state.get("break_interval") * 60) - seconds_since_last_break
