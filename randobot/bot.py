@@ -1,7 +1,7 @@
 from racetime_bot import Bot
 
 from .handler import RandoHandler
-from .generator import Generator
+from .website import Website
 
 
 class RandoBot(Bot):
@@ -9,9 +9,9 @@ class RandoBot(Bot):
     RandoBot base class.
     """
 
-    def __init__(self, github_token, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.generator = Generator(github_token)
+        self.website = Website()
 
     def get_handler_class(self):
         return RandoHandler
@@ -19,5 +19,5 @@ class RandoBot(Bot):
     def get_handler_kwargs(self, *args, **kwargs):
         return {
             **super().get_handler_kwargs(*args, **kwargs),
-            "generator": self.generator,
+            'website': self.website
         }

@@ -1,16 +1,10 @@
-FROM python:3.8-buster
+FROM python:3.10-alpine
 
 WORKDIR /ss-rando-bot
 
-ENV QT_QPA_PLATFORM=offscreen
+RUN apk add git
 
-RUN apt-get update && apt-get install -y \
-  libgl1-mesa-glx \
-  libxkbcommon-x11-0 \
-  libdbus-1-3
-
-COPY . .
-
-RUN cd sslib && pip install -r requirements.txt
+COPY setup.py .
+COPY randobot randobot
 
 RUN pip install -e .

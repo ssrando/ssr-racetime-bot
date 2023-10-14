@@ -16,10 +16,11 @@ setup(
     project_urls={
         'Source': 'https://github.com/floha258/ss-rando-bot',
     },
-    version='1.0.0',
+    version='1.1.0',
     install_requires=[
-        'racetime_bot@git+https://github.com/wooferzfg/racetime-bot@tww-rando-bot',
-        'PyGithub>=1.53'
+        'racetime_bot>=2.1.1,<3.0',
+        'PyGithub>=1.53',
+        'isodate>=0.6.1'
     ],
     packages=find_packages(),
     entry_points={

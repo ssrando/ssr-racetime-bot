@@ -9,7 +9,6 @@ def main():
     parser = argparse.ArgumentParser(
         description="SS RandoBot",
     )
-    parser.add_argument("github_token", type=str, help="GitHub personal access token")
     parser.add_argument("category_slug", type=str, help="racetime.gg category")
     parser.add_argument("client_id", type=str, help="racetime.gg client ID")
     parser.add_argument("client_secret", type=str, help="racetime.gg client secret")
@@ -37,7 +36,6 @@ def main():
         RandoBot.racetime_secure = False
 
     inst = RandoBot(
-        github_token=args.github_token,
         category_slug=args.category_slug,
         client_id=args.client_id,
         client_secret=args.client_secret,
