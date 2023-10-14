@@ -21,10 +21,6 @@ class RandoHandler(RaceHandler):
         "2.1.1_f389925": "Latest (2.1.1_f389925)"
     }
 
-    permalinks = {
-        "Weekly": "o13NyEgCAAAAAAAAIBjQgCiQT/Ae/v/N/P9jPwAA4P9/AAAA4AEAAAACAAAAAAAAAAAAAPgBAAAA/N8GKBABAAACsAAc/gBAAAg0Fg=="
-    }
-
     greetings = (
         'I can roll a seed for you, if motivated.',
         'You will get a nice seed. Promised!',
@@ -33,8 +29,10 @@ class RandoHandler(RaceHandler):
         'Ghirahim asked me to give you this seed. Is that fine?'
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, website, **kwargs):
         super().__init__(**kwargs)
+
+        self.website = website
 
         self.loop = asyncio.get_event_loop()
         self.loop_ended = False
@@ -67,7 +65,7 @@ class RandoHandler(RaceHandler):
                     msg_actions.Action(
                         label='Roll seed',
                         help_text='Create a seed with a specific version and permalink',
-                        message='!rollseed ${version} ${permalink}',
+                        message='!rollseed ${version} ${preset}',
                         submit='Roll seed',
                         survey=msg_actions.Survey(
                             msg_actions.SelectInput(
@@ -76,11 +74,10 @@ class RandoHandler(RaceHandler):
                                 options=self.versions,
                                 default="2.1.1_f389925"
                             ),
-                            msg_actions.TextInput(
-                                name='permalink',
-                                label='Permalink',
-                                placeholder='Paste your permalink here',
-                                help_text='The permalink of the settings you want to use.'
+                            msg_actions.SelectInput(
+                                name='preset',
+                                label='Preset',
+                                options=self.website.presets
                             )
                         )
                     ),
@@ -100,6 +97,7 @@ class RandoHandler(RaceHandler):
             self.state["intro_sent"] = True
 
         #await self.edit(hide_comments=True)
+        self.loop.create_task(self.handle_scheduled_tasks())
 
     # Unpin the first message of the room if it has not been unpinned yet on room closing
     async def end(self):
@@ -646,3 +644,38 @@ class RandoHandler(RaceHandler):
 
         seconds_since_last_break = (datetime.now(timezone.utc) - self.state.get("last_break_time")).total_seconds()
         return (self.state.get("break_interval") * 60) - seconds_since_last_break
+    
+    def _get_formatted_duration_str(self, duration_in_seconds):
+        if duration_in_seconds < 0:
+            return "Invalid time"
+        if duration_in_seconds == 0:
+            return "0 seconds"
+
+        hours = duration_in_seconds // 3600
+        minutes = (duration_in_seconds - (hours * 3600)) // 60
+        seconds = duration_in_seconds - (hours * 3600) - (minutes * 60)
+
+        formatted_str = []
+        if hours != 0:
+            hours_string = f"{hours} hour"
+            if hours > 1:
+                hours_string += "s"
+            formatted_str.append(hours_string)
+        if minutes != 0:
+            minutes_string = f"{minutes} minute"
+            if minutes > 1:
+                minutes_string += "s"
+            formatted_str.append(minutes_string)
+        if seconds != 0:
+            seconds_string = f"{seconds} second"
+            if seconds > 1:
+                seconds_string += "s"
+            formatted_str.append(seconds_string)
+
+        if len(formatted_str) == 3:
+            formatted_str[2] = f"and {formatted_str[2]}"
+            return ", ".join(formatted_str)
+        elif len(formatted_str) == 2:
+            return f"{formatted_str[0]} and {formatted_str[1]}"
+        else:
+            return formatted_str[0]
